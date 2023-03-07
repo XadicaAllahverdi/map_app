@@ -1,6 +1,8 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import html2canvas from 'html2canvas';
-import { Subscription } from 'rxjs';
+import { fromEvent, Subscription } from 'rxjs';
+import { map, tap, switchMap, takeUntil, finalize} from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-home',
@@ -14,24 +16,56 @@ export class HomeComponent implements OnInit {
   @Input() canvasWidth = 640;
   @Input() canvasHeight = 360;
   @ViewChild("downloadLink") downloadLink: ElementRef | undefined;
-
+  // @ViewChild('imgSource') imgSource: ElementRef | null;
   @ViewChild('roiCanvas') canvas: ElementRef | null;
   cx: CanvasRenderingContext2D | null;
+  im_1: CanvasRenderingContext2D | null;
   drawingSubscription: Subscription = new Subscription();
   lineTo: any = [];
   constructor(){
     this.cx = null;
+    this.im_1 = null;
     this.canvas = null;
   }
+
+  
   ngAfterViewInit() {
     const canvasElem: HTMLCanvasElement = this.canvas?.nativeElement;
     this.cx = canvasElem.getContext('2d');
+    this.im_1 = canvasElem.getContext('2d');
+
     console.log(this.canvas)
     canvasElem.width =this.canvas?.nativeElement.clientWidth;
     canvasElem.height = this.canvasHeight;
     // this.cx?.fillStyle = 'rgba(255,63,52,0.15)';
     // this.cx?.strokeStyle = '#c23616';
     // this.cx?.lineWidth = 2;
+    const mouseDownStream = fromEvent(this.canvas?.nativeElement, 'mousedown');
+    const mouseMoveStream = fromEvent(this.canvas?.nativeElement, 'mousemove');
+    const mouseUpStream = fromEvent(window, 'mouseup');
+    mouseDownStream.pipe(
+      tap((event: any) => {
+        if( this.im_1!=null){
+          var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
+          this.im_1.drawImage(iim, event.offsetX, event.offsetY,iim.width,iim.height);
+      
+        }
+          
+      console.log(event.offsetX, event.offsetY)
+      }),
+      switchMap(() => mouseMoveStream.pipe(
+        tap((event: any) => {
+          console.log(event.offsetX, event.offsetY)
+        }),
+        takeUntil(mouseUpStream),
+        finalize(() => {
+         
+        })
+      ))
+    ).subscribe(console.log);
+    
+
+    
     this.captureEvents(canvasElem);
   }
   drawChart(x: number, y: number) {
@@ -106,12 +140,23 @@ export class HomeComponent implements OnInit {
           
             this.cx.closePath();
             this.cx.fill();
+
+
+    
+        if(this.im_1!=null){
+          var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
+          this.im_1.drawImage(iim, 0,0,iim.width,iim.height);
           
+              
+        }
+
+
             html2canvas(this.canvas.nativeElement,{backgroundColor:null}).then(canvas => {
               if(this.canvas!=null && this.downloadLink){
+              
                 this.canvas.nativeElement.src = canvas.toDataURL();
                 this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
-                console.log(canvas.toDataURL("image/png"))
+                //console.log(canvas.toDataURL("image/png"))
                 this.downloadLink.nativeElement.download = "marble-diagram.png";
                 this.downloadLink.nativeElement.click();
               }
