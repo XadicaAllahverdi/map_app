@@ -1,4 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import html2canvas from 'html2canvas';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -12,6 +13,7 @@ export class HomeComponent implements OnInit {
   }
   @Input() canvasWidth = 640;
   @Input() canvasHeight = 360;
+  @ViewChild("downloadLink") downloadLink: ElementRef | undefined;
 
   @ViewChild('roiCanvas') canvas: ElementRef | null;
   cx: CanvasRenderingContext2D | null;
@@ -92,7 +94,7 @@ export class HomeComponent implements OnInit {
         //console.log(tempArray)
         this.lineTo.push({ x: startX, y: startY });
         if(!canDraw){
-          if(this.cx!=null){
+          if(this.cx!=null && this.canvas!=null){
             this.cx.fillStyle = "#EEF3F9";
             this.cx.beginPath();
             this.cx.moveTo(firstX, firstY);
@@ -105,6 +107,17 @@ export class HomeComponent implements OnInit {
             this.cx.closePath();
             this.cx.fill();
           
+            html2canvas(this.canvas.nativeElement,{backgroundColor:null}).then(canvas => {
+              if(this.canvas!=null && this.downloadLink){
+                this.canvas.nativeElement.src = canvas.toDataURL();
+                this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
+                console.log(canvas.toDataURL("image/png"))
+                this.downloadLink.nativeElement.download = "marble-diagram.png";
+                this.downloadLink.nativeElement.click();
+              }
+             
+            });
+
           }
         }
       }

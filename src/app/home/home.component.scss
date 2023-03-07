@@ -1,7 +1,7 @@
 canvas#canvas {
-    border: 1px dashed #ccc;
     width: 100%;
     z-index: 1;
+    background: transparent;
 }
 
 .back-main {
@@ -10,6 +10,7 @@ canvas#canvas {
 
 .main-paper {
     width: 100%;
+    border: 1px dashed #ccc;
     height: 700px;
     background-color: white;
     border-radius: 5px;
