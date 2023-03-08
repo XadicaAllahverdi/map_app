@@ -7,6 +7,7 @@
                     <button class="btn" mat-raised-button color="primary" (click)="save()" [disabled]="!spClick && !cnClick">Save</button>
                     <button class="btn" mat-raised-button color="primary" (click)="clear()" [disabled]="!canDraw">Clear</button>
                     <button class="btn" mat-raised-button color="primary" (click)="undo()" [disabled]="!canDraw">Undo</button>
+                    <button class="btn" mat-raised-button color="primary" (click)="remove()" [disabled]="canDraw || spClick || cnClick">Remove</button>
 
 
                 </mat-sidenav-content>
