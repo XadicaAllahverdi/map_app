@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import html2canvas from 'html2canvas';
 import { fromEvent, Subscription } from 'rxjs';
-import { map, tap, switchMap, takeUntil, finalize} from 'rxjs/operators';
+import { map, tap, switchMap, takeUntil, finalize } from 'rxjs/operators';
 
 
 @Component({
@@ -11,7 +11,7 @@ import { map, tap, switchMap, takeUntil, finalize} from 'rxjs/operators';
 })
 export class HomeComponent implements OnInit {
   ngOnInit(): void {
-   
+
   }
   @Input() canvasWidth = 640;
   @Input() canvasHeight = 360;
@@ -20,22 +20,25 @@ export class HomeComponent implements OnInit {
   @ViewChild('roiCanvas') canvas: ElementRef | null;
   cx: CanvasRenderingContext2D | null;
   im_1: CanvasRenderingContext2D | null;
+  firstX: any;
+  firstY: any;
+  canDraw = true;
   drawingSubscription: Subscription = new Subscription();
   lineTo: any = [];
-  constructor(){
+  constructor() {
     this.cx = null;
     this.im_1 = null;
     this.canvas = null;
   }
 
-  
+
   ngAfterViewInit() {
     const canvasElem: HTMLCanvasElement = this.canvas?.nativeElement;
     this.cx = canvasElem.getContext('2d');
     this.im_1 = canvasElem.getContext('2d');
-
+    this.canvasWidth = this.canvas?.nativeElement.clientWidth;
     console.log(this.canvas)
-    canvasElem.width =this.canvas?.nativeElement.clientWidth;
+    canvasElem.width = this.canvas?.nativeElement.clientWidth;
     canvasElem.height = this.canvasHeight;
     // this.cx?.fillStyle = 'rgba(255,63,52,0.15)';
     // this.cx?.strokeStyle = '#c23616';
@@ -45,13 +48,27 @@ export class HomeComponent implements OnInit {
     const mouseUpStream = fromEvent(window, 'mouseup');
     mouseDownStream.pipe(
       tap((event: any) => {
-        if( this.im_1!=null){
+        if (!this.canDraw && this.im_1 != null && this.cx != null) {
+          this.im_1.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+          this.cx?.arc(this.firstX, this.firstY, 2, 0, Math.PI * 2);
+          this.cx.fillStyle = "#EEF3F9";
+          this.cx.strokeStyle = '#88A3B8';
+          this.cx.lineWidth = 7;
+          this.cx.beginPath();
+          this.cx.moveTo(this.firstX, this.firstY);
+          this.lineTo.forEach((el: { x: number; y: number }) => {
+            if (this.cx != null) {
+              this.cx.lineTo(el.x, el.y);
+            }
+          });
+          this.cx?.stroke();
+          this.cx.closePath();
+          this.cx.fill();
           var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
-          this.im_1.drawImage(iim, event.offsetX, event.offsetY,iim.width,iim.height);
-      
+          this.im_1.drawImage(iim, event.offsetX, event.offsetY, iim.width, iim.height);
         }
-          
-      console.log(event.offsetX, event.offsetY)
+
+        console.log(event.offsetX, event.offsetY)
       }),
       switchMap(() => mouseMoveStream.pipe(
         tap((event: any) => {
@@ -59,17 +76,17 @@ export class HomeComponent implements OnInit {
         }),
         takeUntil(mouseUpStream),
         finalize(() => {
-         
+
         })
       ))
     ).subscribe(console.log);
-    
 
-    
+
+
     this.captureEvents(canvasElem);
   }
   drawChart(x: number, y: number) {
-    if(this.cx!=null){
+    if (this.cx != null) {
       this.cx?.beginPath();
       this.cx?.arc(x, y, 2, 0, Math.PI * 2);
       this.cx.strokeStyle = '#88A3B8';
@@ -77,7 +94,7 @@ export class HomeComponent implements OnInit {
       this.cx?.stroke();
       this.cx?.fill();
     }
-  
+
   }
   captureEvents(canvasEl: HTMLCanvasElement) {
     let startX: any;
@@ -85,11 +102,9 @@ export class HomeComponent implements OnInit {
     let mouseX: any;
     let mouseY: any;
     let tempArray = [];
-    let firstX: any;
-    let firstY: any;
-    let canDraw = true;
+
     canvasEl.addEventListener('mousedown', (e) => {
-      if (canDraw) {
+      if (this.canDraw) {
         startX = null;
         startY = null;
 
@@ -97,15 +112,15 @@ export class HomeComponent implements OnInit {
         startX = e.clientX - rect.left;
         startY = e.clientY - rect.top;
 
-        if (firstX == null) {
-          firstX = startX;
-          firstY = startY;
+        if (this.firstX == null) {
+          this.firstX = startX;
+          this.firstY = startY;
         }
-        else if (Math.abs(firstX - startX) <= 5 && Math.abs(firstY - startY) <= 5) {
+        else if (Math.abs(this.firstX - startX) <= 5 && Math.abs(this.firstY - startY) <= 5) {
           console.log('stop here', startX, startY);
-          canDraw = false;
-         
-      
+          this.canDraw = false;
+
+
         }
         console.log('test here', startX, startY);
         this.drawChart(startX, startY);
@@ -113,54 +128,54 @@ export class HomeComponent implements OnInit {
         //tempArray.push({ x: startX, y: startY });
         // console.log(tempArray)
         if (this.lineTo.length > 0) {
-          if(this.cx!=null){
+          if (this.cx != null) {
             this.cx.lineWidth = 7;
             var last = this.lineTo[this.lineTo.length - 1];
-  
+
             this.cx?.beginPath();
             this.cx?.moveTo(last.x, last.y);
             this.cx?.lineTo(startX, startY);
             this.cx.strokeStyle = '#88A3B8';
             this.cx?.stroke();
           }
-       
+
         }
         //console.log(tempArray)
         this.lineTo.push({ x: startX, y: startY });
-        if(!canDraw){
-          if(this.cx!=null && this.canvas!=null){
+        if (!this.canDraw) {
+          if (this.cx != null && this.canvas != null) {
             this.cx.fillStyle = "#EEF3F9";
             this.cx.beginPath();
-            this.cx.moveTo(firstX, firstY);
-            this.lineTo.forEach((el: { x: number;y:number }) => {
-              if(this.cx!=null){
-              this.cx.lineTo(el.x,el.y);
+            this.cx.moveTo(this.firstX, this.firstY);
+            this.lineTo.forEach((el: { x: number; y: number }) => {
+              if (this.cx != null) {
+                this.cx.lineTo(el.x, el.y);
               }
             });
-          
+
             this.cx.closePath();
             this.cx.fill();
 
 
-    
-        if(this.im_1!=null){
-          var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
-          this.im_1.drawImage(iim, 0,0,iim.width,iim.height);
-          
-              
-        }
+
+            if (this.im_1 != null) {
+              var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
+              this.im_1.drawImage(iim, 0, 0, iim.width, iim.height);
 
 
-            html2canvas(this.canvas.nativeElement,{backgroundColor:null}).then(canvas => {
-              if(this.canvas!=null && this.downloadLink){
-              
+            }
+
+
+            html2canvas(this.canvas.nativeElement, { backgroundColor: null }).then(canvas => {
+              if (this.canvas != null && this.downloadLink) {
+
                 this.canvas.nativeElement.src = canvas.toDataURL();
                 this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
                 //console.log(canvas.toDataURL("image/png"))
                 this.downloadLink.nativeElement.download = "marble-diagram.png";
                 this.downloadLink.nativeElement.click();
               }
-             
+
             });
 
           }
@@ -174,8 +189,8 @@ export class HomeComponent implements OnInit {
     this.lineTo = [];
   }
   drawPaths() {
-  
-      // delete everything
+
+    // delete everything
     this.cx?.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
     // draw all the paths in the paths array
     this.lineTo.forEach((path: any) => {
@@ -186,13 +201,13 @@ export class HomeComponent implements OnInit {
         this.drawChart(path[i].x, path[i].y);
         this.cx?.lineTo(path[i].x, path[i].y);
       }
-      if(this.cx!=null){
-      this.cx.strokeStyle = '#88A3B8';
-      this.cx?.stroke();
+      if (this.cx != null) {
+        this.cx.strokeStyle = '#88A3B8';
+        this.cx?.stroke();
       }
     });
-    
-    
+
+
   }
   undo() {
     this.lineTo.splice(-1, 1);
