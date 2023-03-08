@@ -23,8 +23,11 @@ export class HomeComponent implements OnInit {
   firstX: any;
   firstY: any;
   canDraw = true;
+  keepX: any;
+  keepY: any;
   drawingSubscription: Subscription = new Subscription();
   lineTo: any = [];
+  imgTo: any = [];
   constructor() {
     this.cx = null;
     this.im_1 = null;
@@ -46,6 +49,64 @@ export class HomeComponent implements OnInit {
     const mouseDownStream = fromEvent(this.canvas?.nativeElement, 'mousedown');
     const mouseMoveStream = fromEvent(this.canvas?.nativeElement, 'mousemove');
     const mouseUpStream = fromEvent(window, 'mouseup');
+    
+    mouseMoveStream.pipe(
+      tap((event: any) => {
+        if (!this.canDraw && this.im_1 != null && this.cx != null) {
+          this.im_1.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+          this.cx?.arc(this.firstX, this.firstY, 2, 0, Math.PI * 2);
+          this.cx.fillStyle = "#EEF3F9";
+          this.cx.strokeStyle = '#88A3B8';
+          this.cx.lineWidth = 7;
+          this.cx.beginPath();
+          this.cx.moveTo(this.firstX, this.firstY);
+          this.lineTo.forEach((el: { x: number; y: number }) => {
+            if (this.cx != null) {
+              this.cx.lineTo(el.x, el.y);
+            }
+          });
+          this.cx?.stroke();
+          this.cx.closePath();
+          this.cx.fill();
+        
+          this.imgTo.forEach((el: { x: number; y: number, w: number, h:number, type: string }) => {
+            if (this.cx != null) {
+              var iim = document.getElementById(el.type) as HTMLCanvasElement;
+              this.cx.drawImage(iim,el.x, el.y, el.w, el.h);
+
+              if(event.offsetX-this.keepX <=el.w && event.offsetY-this.keepY <=el.h){
+                console.log(event.offsetX, this.keepX, event.offsetY, this.keepY)
+                // this.cx.lineWidth=2;
+                // this.cx.strokeStyle = "#5f3eef";
+                // this.cx.shadowColor="#5f3eef";
+                // this.cx.shadowBlur=10;
+                // this.cx.strokeRect(el.x-1, el.y-1, el.w+1, el.h+1);
+                // this.cx.shadowBlur = 0;
+                this.cx.font = "15px";
+                this.cx.fillStyle = "#5f3eef";
+                this.cx.strokeStyle = "#fafafa";
+                this.cx.lineWidth=2;
+                this.cx.fillRect(el.x + el.w/3 + 10,  el.y + el.h/3-30, 130, 30)
+                this.cx.fillStyle = "white";
+                this.cx.fillText("Desk "+ el.x  , el.x + el.w/3 + 5 + 10, el.y + el.h/3-15);
+                this.cx.strokeRect(el.x + el.w/3-1 + 10,el.y + el.h/3, 131, 41);
+                this.cx.fillStyle = "white";
+                this.cx.fillRect(el.x + el.w/3 + 10,  el.y + el.h/3, 130, 40)
+                this.cx.strokeRect(el.x + el.w/3-1 + 10,el.y + el.h/3, 131, 41);
+                this.cx.fillStyle = "#88A3B8";
+                this.cx.fillText("Hi "+ el.x  , el.x + el.w/2 + 5 + 10, el.y + el.h/2 + 15);
+              }
+            }
+          });
+       
+         
+         
+        }
+
+        console.log(event.offsetX, event.offsetY)
+      })
+    ).subscribe(console.log);
+
     mouseDownStream.pipe(
       tap((event: any) => {
         if (!this.canDraw && this.im_1 != null && this.cx != null) {
@@ -64,15 +125,38 @@ export class HomeComponent implements OnInit {
           this.cx?.stroke();
           this.cx.closePath();
           this.cx.fill();
-          var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
-          this.im_1.drawImage(iim, event.offsetX, event.offsetY, iim.width, iim.height);
+        
+        
+          if(this.keepX==null){
+            this.keepX = event.offsetX;
+            this.keepY = event.offsetY;
+            var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
+            this.imgTo.push({x:event.offsetX, y:event.offsetY, w:iim.width, h:iim.height, type:"imageSrc"});
+          }
+          
+          this.imgTo.forEach((el: { x: number; y: number, w: number, h:number, type: string }) => {
+            if (this.cx != null) {
+              var iim = document.getElementById(el.type) as HTMLCanvasElement;
+              this.cx.drawImage(iim,el.x, el.y, el.w, el.h);
+
+              if(event.offsetX-this.keepX <=el.w && event.offsetY-this.keepY <=el.h){
+                console.log(event.offsetX, this.keepX, event.offsetY, this.keepY)
+              }
+            }
+          });
+       
+         
+         
         }
 
         console.log(event.offsetX, event.offsetY)
       }),
       switchMap(() => mouseMoveStream.pipe(
         tap((event: any) => {
-          console.log(event.offsetX, event.offsetY)
+          event.preventDefault();
+          event.stopPropagation();
+         console.log("mmmm")
+  
         }),
         takeUntil(mouseUpStream),
         finalize(() => {
