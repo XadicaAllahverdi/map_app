@@ -97,8 +97,7 @@ export class HomeComponent implements OnInit {
       
       if(this.lineImg){
         var iim = document.getElementById(this.lineImg) as HTMLCanvasElement;
-      
-        this.cx.drawImage(iim, 0, 0, iim.width, iim.height);
+        this.cx.drawImage(iim, 0, 0, this.canvasWidth, this.canvasHeight);
 
       }else{
         this.lineTo.forEach((el: { x: number; y: number }) => {
@@ -237,11 +236,11 @@ export class HomeComponent implements OnInit {
             html2canvas(this.canvas.nativeElement, { backgroundColor: null }).then(canvas => {
               if (this.canvas != null && this.downloadLink) {
 
-                // this.canvas.nativeElement.src = canvas.toDataURL();
-                // this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
-                // //console.log(canvas.toDataURL("image/png"))
-                // this.downloadLink.nativeElement.download = "marble-diagram.png";
-                // this.downloadLink.nativeElement.click();
+                this.canvas.nativeElement.src = canvas.toDataURL();
+                this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
+                //console.log(canvas.toDataURL("image/png"))
+                this.downloadLink.nativeElement.download = "marble-diagram.png";
+                this.downloadLink.nativeElement.click();
               }
 
             });
@@ -255,6 +254,10 @@ export class HomeComponent implements OnInit {
   clear() {
     this.cx?.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
     this.lineTo = [];
+    this.lineImg = null;
+    this.firstX = null;
+    this.firstY = null;
+    this.imgTo = [];
   }
   drawPaths() {
 
@@ -316,6 +319,9 @@ export class HomeComponent implements OnInit {
     if (this.cx != null) {
       this.lineTo = [];
       this.lineImg = null;
+      this.firstX = null;
+      this.firstY = null;
+      this.imgTo = [];
       this.fillWholeElements("mouseMove", {offsetX:0, offsetY:0});
       if(item=="ly_0"){
         this.canDraw = true;
@@ -323,7 +329,7 @@ export class HomeComponent implements OnInit {
         this.lyClick = true;
         var img_el = document.getElementById(item) as HTMLCanvasElement;
         console.log(img_el);
-        this.cx.drawImage(img_el, 0, 0, img_el.width, img_el.height);
+        this.cx.drawImage(img_el, 0, 0, this.canvasWidth, this.canvasHeight);
         this.activeKey = item;
         this.lineImg = item;
       }
