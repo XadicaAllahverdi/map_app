@@ -13,13 +13,20 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
 
   }
-  @Input() canvasWidth = 640;
-  @Input() canvasHeight = 360;
+  layouts: any = ["ly_1", "ly_2", "ly_3"];
+  spaces: any = ["sp_1", "sp_2", "sp_3"];
+  connectors: any = ["cn_1", "cn_2", "cn_3", "cn_4", "cn_5"];
+  spClick = false;
+  lyClick = false;
+  cnClick = false;
+  activeKey: any;
+  activeX: any;
+  activeY: any;
+  canvasWidth: any;
+  canvasHeight: any;
   @ViewChild("downloadLink") downloadLink: ElementRef | undefined;
-  // @ViewChild('imgSource') imgSource: ElementRef | null;
   @ViewChild('roiCanvas') canvas: ElementRef | null;
   cx: CanvasRenderingContext2D | null;
-  im_1: CanvasRenderingContext2D | null;
   firstX: any;
   firstY: any;
   canDraw = true;
@@ -30,7 +37,6 @@ export class HomeComponent implements OnInit {
   imgTo: any = [];
   constructor() {
     this.cx = null;
-    this.im_1 = null;
     this.canvas = null;
   }
 
@@ -38,126 +44,33 @@ export class HomeComponent implements OnInit {
   ngAfterViewInit() {
     const canvasElem: HTMLCanvasElement = this.canvas?.nativeElement;
     this.cx = canvasElem.getContext('2d');
-    this.im_1 = canvasElem.getContext('2d');
     this.canvasWidth = this.canvas?.nativeElement.clientWidth;
+    this.canvasHeight = this.canvas?.nativeElement.clientHeight;
     console.log(this.canvas)
     canvasElem.width = this.canvas?.nativeElement.clientWidth;
-    canvasElem.height = this.canvasHeight;
-    // this.cx?.fillStyle = 'rgba(255,63,52,0.15)';
-    // this.cx?.strokeStyle = '#c23616';
-    // this.cx?.lineWidth = 2;
+    canvasElem.height = this.canvas?.nativeElement.clientHeight;
     const mouseDownStream = fromEvent(this.canvas?.nativeElement, 'mousedown');
     const mouseMoveStream = fromEvent(this.canvas?.nativeElement, 'mousemove');
     const mouseUpStream = fromEvent(window, 'mouseup');
-    
+
     mouseMoveStream.pipe(
       tap((event: any) => {
-        if (!this.canDraw && this.im_1 != null && this.cx != null) {
-          this.im_1.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-          this.cx?.arc(this.firstX, this.firstY, 2, 0, Math.PI * 2);
-          this.cx.fillStyle = "#EEF3F9";
-          this.cx.strokeStyle = '#88A3B8';
-          this.cx.lineWidth = 7;
-          this.cx.beginPath();
-          this.cx.moveTo(this.firstX, this.firstY);
-          this.lineTo.forEach((el: { x: number; y: number }) => {
-            if (this.cx != null) {
-              this.cx.lineTo(el.x, el.y);
-            }
-          });
-          this.cx?.stroke();
-          this.cx.closePath();
-          this.cx.fill();
-        
-          this.imgTo.forEach((el: { x: number; y: number, w: number, h:number, type: string }) => {
-            if (this.cx != null) {
-              var iim = document.getElementById(el.type) as HTMLCanvasElement;
-              this.cx.drawImage(iim,el.x, el.y, el.w, el.h);
-
-              if(event.offsetX-el.x <=el.w && event.offsetX-el.x >=0  && event.offsetY-el.y <=el.h && event.offsetY-el.y >=0){
-                console.log(event.offsetX,el.x, event.offsetY, el.y)
-              
-                // this.cx.lineWidth=2;
-                // this.cx.strokeStyle = "#5f3eef";
-                // this.cx.shadowColor="#5f3eef";
-                // this.cx.shadowBlur=10;
-                // this.cx.strokeRect(el.x-1, el.y-1, el.w+1, el.h+1);
-                // this.cx.shadowBlur = 0;
-                this.cx.font = "15px";
-                this.cx.fillStyle = "#5f3eef";
-                this.cx.strokeStyle = "#fafafa";
-                this.cx.lineWidth=2;
-                this.cx.fillRect(el.x + el.w/3 + 10,  el.y + el.h/3-30, 130, 30)
-                this.cx.fillStyle = "white";
-                this.cx.fillText("Desk "+ el.x  , el.x + el.w/3 + 5 + 10, el.y + el.h/3-15);
-                this.cx.strokeRect(el.x + el.w/3-1 + 10,el.y + el.h/3, 131, 41);
-                this.cx.fillStyle = "white";
-                this.cx.fillRect(el.x + el.w/3 + 10,  el.y + el.h/3, 130, 40)
-                this.cx.strokeRect(el.x + el.w/3-1 + 10,el.y + el.h/3, 131, 41);
-                this.cx.fillStyle = "#88A3B8";
-                this.cx.fillText("Hi "+ el.x  , el.x + el.w/2 + 5 + 10, el.y + el.h/2 + 15);
-              }
-            }
-          });
-       
-         
-         
+        if (!this.spClick) {
+          this.fillWholeElements("mouseMove", event);
         }
 
-        console.log(event.offsetX, event.offsetY)
       })
     ).subscribe(console.log);
 
     mouseDownStream.pipe(
       tap((event: any) => {
-        if (!this.canDraw && this.im_1 != null && this.cx != null) {
-          this.im_1.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-          this.cx?.arc(this.firstX, this.firstY, 2, 0, Math.PI * 2);
-          this.cx.fillStyle = "#EEF3F9";
-          this.cx.strokeStyle = '#88A3B8';
-          this.cx.lineWidth = 7;
-          this.cx.beginPath();
-          this.cx.moveTo(this.firstX, this.firstY);
-          this.lineTo.forEach((el: { x: number; y: number }) => {
-            if (this.cx != null) {
-              this.cx.lineTo(el.x, el.y);
-            }
-          });
-          this.cx?.stroke();
-          this.cx.closePath();
-          this.cx.fill();
-        
-        
-          if(this.keepX==null){
-            this.keepX = event.offsetX;
-            this.keepY = event.offsetY;
-            var iim = document.getElementById("imageSrc2") as HTMLCanvasElement;
-            this.imgTo.push({x:event.offsetX, y:event.offsetY, w:iim.width, h:iim.height, type:"imageSrc2"});
-          }
-          
-          this.imgTo.forEach((el: { x: number; y: number, w: number, h:number, type: string }) => {
-            if (this.cx != null) {
-              var iim = document.getElementById(el.type) as HTMLCanvasElement;
-              this.cx.drawImage(iim,el.x, el.y, el.w, el.h);
-
-              if(event.offsetX-el.x <=el.w && event.offsetX-el.x >=0  && event.offsetY-el.y <=el.h && event.offsetY-el.y >=0){
-                console.log(event.offsetX,el.x, event.offsetY, el.y)
-              }
-            }
-          });
-       
-         
-         
-        }
-
-        console.log(event.offsetX, event.offsetY)
+        this.fillWholeElements("mouseDown", event);
       }),
       switchMap(() => mouseMoveStream.pipe(
         tap((event: any) => {
           event.preventDefault();
           event.stopPropagation();
-         console.log("mmmm")
-  
+
         }),
         takeUntil(mouseUpStream),
         finalize(() => {
@@ -170,6 +83,69 @@ export class HomeComponent implements OnInit {
 
     this.captureEvents(canvasElem);
   }
+
+  fillWholeElements(methodType: string, event: any) {
+    if (!this.canDraw && this.cx != null) {
+      this.cx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+      this.cx?.arc(this.firstX, this.firstY, 2, 0, Math.PI * 2);
+      this.cx.fillStyle = "#EEF3F9";
+      this.cx.strokeStyle = '#88A3B8';
+      this.cx.lineWidth = 7;
+      this.cx.beginPath();
+      this.cx.moveTo(this.firstX, this.firstY);
+      this.lineTo.forEach((el: { x: number; y: number }) => {
+        if (this.cx != null) {
+          this.cx.lineTo(el.x, el.y);
+        }
+      });
+      this.cx?.stroke();
+      this.cx.closePath();
+      this.cx.fill();
+
+
+      this.imgTo.forEach((el: { x: number; y: number, w: number, h: number, type: string }) => {
+        if (this.cx != null) {
+          var iim = document.getElementById(el.type) as HTMLCanvasElement;
+          this.cx.drawImage(iim, el.x, el.y, el.w, el.h);
+
+
+          if (methodType == "mouseMove" && event.offsetX - el.x <= el.w && event.offsetX - el.x >= 0 && event.offsetY - el.y <= el.h && event.offsetY - el.y >= 0) {
+            console.log(event.offsetX, el.x, event.offsetY, el.y)
+
+            this.cx.font = "15px";
+            this.cx.fillStyle = "#5f3eef";
+            this.cx.strokeStyle = "#fafafa";
+            this.cx.lineWidth = 2;
+            this.cx.fillRect(el.x + el.w / 3 + 10, el.y + el.h / 3 - 30, 130, 30)
+            this.cx.fillStyle = "white";
+            this.cx.fillText("Desk " + el.x, el.x + el.w / 3 + 5 + 10, el.y + el.h / 3 - 15);
+            this.cx.strokeRect(el.x + el.w / 3 - 1 + 10, el.y + el.h / 3, 131, 41);
+            this.cx.fillStyle = "white";
+            this.cx.fillRect(el.x + el.w / 3 + 10, el.y + el.h / 3, 130, 40)
+            this.cx.strokeRect(el.x + el.w / 3 - 1 + 10, el.y + el.h / 3, 131, 41);
+            this.cx.fillStyle = "#88A3B8";
+            this.cx.fillText("Hi " + el.x, el.x + el.w / 2 + 5 + 10, el.y + el.h / 2 + 15);
+          }
+
+
+        }
+      });
+
+      if (methodType == "mouseDown") {
+        if (this.spClick) {
+          var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
+          this.cx.drawImage(img_el, event.offsetX - 10, event.offsetY - 10, img_el.width, img_el.height);
+          this.activeX = event.offsetX;
+          this.activeY = event.offsetY;
+        }
+      }
+
+
+
+    }
+
+  }
+
   drawChart(x: number, y: number) {
     if (this.cx != null) {
       this.cx?.beginPath();
@@ -209,9 +185,7 @@ export class HomeComponent implements OnInit {
         }
         console.log('test here', startX, startY);
         this.drawChart(startX, startY);
-        //this.lineTo.push({ x: startX, y: startY });
-        //tempArray.push({ x: startX, y: startY });
-        // console.log(tempArray)
+
         if (this.lineTo.length > 0) {
           if (this.cx != null) {
             this.cx.lineWidth = 7;
@@ -225,7 +199,7 @@ export class HomeComponent implements OnInit {
           }
 
         }
-        //console.log(tempArray)
+
         this.lineTo.push({ x: startX, y: startY });
         if (!this.canDraw) {
           if (this.cx != null && this.canvas != null) {
@@ -252,11 +226,11 @@ export class HomeComponent implements OnInit {
             html2canvas(this.canvas.nativeElement, { backgroundColor: null }).then(canvas => {
               if (this.canvas != null && this.downloadLink) {
 
-                this.canvas.nativeElement.src = canvas.toDataURL();
-                this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
-                //console.log(canvas.toDataURL("image/png"))
-                this.downloadLink.nativeElement.download = "marble-diagram.png";
-                this.downloadLink.nativeElement.click();
+                // this.canvas.nativeElement.src = canvas.toDataURL();
+                // this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
+                // //console.log(canvas.toDataURL("image/png"))
+                // this.downloadLink.nativeElement.download = "marble-diagram.png";
+                // this.downloadLink.nativeElement.click();
               }
 
             });
@@ -310,6 +284,32 @@ export class HomeComponent implements OnInit {
       //this.cx?.strokeStyle = '#0652DD';
       this.cx?.stroke();
     });
+  }
+
+  getImage(str: string, ext: string) {
+    return "../../assets/images/" + str + "." + ext;
+  }
+
+  spaceClick(item: string) {
+    if (this.cx != null) {
+      this.spClick = true;
+      var img_el = document.getElementById(item) as HTMLCanvasElement;
+      this.cx.drawImage(img_el, 0, 0, img_el.width, img_el.height);
+      this.activeKey = item;
+    }
+
+  }
+
+  save() {
+    if (this.cx != null) {
+      if(this.spClick){
+        this.spClick = false;
+        var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
+        this.imgTo.push({ x: this.activeX, y: this.activeY, w: img_el.width, h: img_el.height, type: this.activeKey });
+  
+      }
+    
+    }
   }
 }
 
