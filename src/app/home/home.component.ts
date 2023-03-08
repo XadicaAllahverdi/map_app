@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit {
   }
   layouts: any = ["ly_0","ly_1", "ly_2", "ly_3"];
   spaces: any = ["sp_1", "sp_2", "sp_3"];
-  connectors: any = ["cn_1", "cn_2", "cn_3", "cn_4", "cn_5"];
+  connectors: any = ["cn_1", "cn_2", "cn_3", "cn_4", "cn_5", "cn_6", "cn_7", "cn_8", "cn_9"];
   spClick = false;
   lyClick = false;
   cnClick = false;
@@ -36,6 +36,7 @@ export class HomeComponent implements OnInit {
   lineTo: any = [];
   lineImg: any;
   imgTo: any = [];
+  cnTo: any = [];
   constructor() {
     this.cx = null;
     this.canvas = null;
@@ -56,7 +57,7 @@ export class HomeComponent implements OnInit {
 
     mouseMoveStream.pipe(
       tap((event: any) => {
-        if (!this.spClick) {
+        if (!this.spClick && !this.cnClick) {
           this.fillWholeElements("mouseMove", event);
         }
 
@@ -141,8 +142,21 @@ export class HomeComponent implements OnInit {
         }
       });
 
+      this.cnTo.forEach((el: { x: number; y: number, w: number, h: number, type: string }) => {
+        if (this.cx != null) {
+          var iim = document.getElementById(el.type) as HTMLCanvasElement;
+          this.cx.drawImage(iim, el.x, el.y, el.w, el.h);
+        }
+      });
+
+
       if (methodType == "mouseDown") {
         if (this.spClick) {
+          var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
+          this.cx.drawImage(img_el, event.offsetX - img_el.width/3, event.offsetY -  img_el.height/3, img_el.width, img_el.height);
+          this.activeX = event.offsetX;
+          this.activeY = event.offsetY;
+        }else  if (this.cnClick) {
           var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
           this.cx.drawImage(img_el, event.offsetX - img_el.width/3, event.offsetY -  img_el.height/3, img_el.width, img_el.height);
           this.activeX = event.offsetX;
@@ -306,8 +320,21 @@ export class HomeComponent implements OnInit {
 
   spaceClick(item: string) {
     if (this.cx != null) {
+      this.cnClick = false;
       this.fillWholeElements("mouseMove", {offsetX:0, offsetY:0});
       this.spClick = true;
+      var img_el = document.getElementById(item) as HTMLCanvasElement;
+      this.cx.drawImage(img_el, 0, 0, img_el.width, img_el.height);
+      this.activeKey = item;
+    }
+
+  }
+
+  connectorClick(item: string) {
+    if (this.cx != null) {
+      this.spClick = false;
+      this.fillWholeElements("mouseMove", {offsetX:0, offsetY:0});
+      this.cnClick = true;
       var img_el = document.getElementById(item) as HTMLCanvasElement;
       this.cx.drawImage(img_el, 0, 0, img_el.width, img_el.height);
       this.activeKey = item;
@@ -322,6 +349,8 @@ export class HomeComponent implements OnInit {
       this.firstX = null;
       this.firstY = null;
       this.imgTo = [];
+      this.spClick = false;
+      this.cnClick = false;
       this.fillWholeElements("mouseMove", {offsetX:0, offsetY:0});
       if(item=="ly_0"){
         this.canDraw = true;
@@ -341,11 +370,13 @@ export class HomeComponent implements OnInit {
 
   save() {
     if (this.cx != null) {
+      var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
       if(this.spClick){
         this.spClick = false;
-        var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
         this.imgTo.push({ x: this.activeX- img_el.width/3, y: this.activeY-img_el.height/3, w: img_el.width, h: img_el.height, type: this.activeKey });
-  
+      }else  if(this.cnClick){
+        this.cnClick = false;
+        this.cnTo.push({ x: this.activeX- img_el.width/3, y: this.activeY-img_el.height/3, w: img_el.width, h: img_el.height, type: this.activeKey });
       }
     
     }

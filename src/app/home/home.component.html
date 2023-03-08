@@ -4,7 +4,7 @@
             <mat-sidenav-container class="sidenav-main">
                 <mat-sidenav>Start</mat-sidenav>
                 <mat-sidenav-content>
-                    <button class="btn" mat-raised-button color="primary" (click)="save()" [disabled]="!spClick">Save</button>
+                    <button class="btn" mat-raised-button color="primary" (click)="save()" [disabled]="!spClick && !cnClick">Save</button>
                     <button class="btn" mat-raised-button color="primary" (click)="clear()" [disabled]="!canDraw">Clear</button>
                     <button class="btn" mat-raised-button color="primary" (click)="undo()" [disabled]="!canDraw">Undo</button>
 
@@ -47,7 +47,7 @@
                 </mat-tab>
                 <mat-tab label="Connectors ">
                     <div class="container-fluid ">
-                        <div class="row block-style" *ngFor="let item of connectors; let i=index " [attr.data-index]="i">
+                        <div (click)="connectorClick(item)" class="row block-style" *ngFor="let item of connectors; let i=index " [attr.data-index]="i">
                             <div class="col-lg-12 ">
                                 <img class="real_img " [src]="getImage(item, 'svg') ">
                                 <h1>Connector {{i + 1}}</h1>
