@@ -13,7 +13,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
 
   }
-  layouts: any = ["ly_0", "ly_1", "ly_2", "ly_3"];
+  layouts: any = ["ly_0", "ly_1", "ly_2", "ly_3", "ly_4"];
   spaces: any = ["sp_1", "sp_2", "sp_3"];
   connectors: any = ["cn_1", "cn_2", "cn_3", "cn_4", "cn_5", "cn_6", "cn_7", "cn_8", "cn_9"];
   spClick = false;
@@ -267,11 +267,11 @@ export class HomeComponent implements OnInit {
             html2canvas(this.canvas.nativeElement, { backgroundColor: null }).then(canvas => {
               if (this.canvas != null && this.downloadLink) {
 
-                // this.canvas.nativeElement.src = canvas.toDataURL();
-                // this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
-                // //console.log(canvas.toDataURL("image/png"))
-                // this.downloadLink.nativeElement.download = "marble-diagram.png";
-                // this.downloadLink.nativeElement.click();
+                this.canvas.nativeElement.src = canvas.toDataURL();
+                this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
+                //console.log(canvas.toDataURL("image/png"))
+                this.downloadLink.nativeElement.download = "marble-diagram.png";
+                this.downloadLink.nativeElement.click();
               }
 
             });
