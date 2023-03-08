@@ -74,8 +74,9 @@ export class HomeComponent implements OnInit {
               var iim = document.getElementById(el.type) as HTMLCanvasElement;
               this.cx.drawImage(iim,el.x, el.y, el.w, el.h);
 
-              if(event.offsetX-this.keepX <=el.w && event.offsetY-this.keepY <=el.h){
-                console.log(event.offsetX, this.keepX, event.offsetY, this.keepY)
+              if(event.offsetX-el.x <=el.w && event.offsetX-el.x >=0  && event.offsetY-el.y <=el.h && event.offsetY-el.y >=0){
+                console.log(event.offsetX,el.x, event.offsetY, el.y)
+              
                 // this.cx.lineWidth=2;
                 // this.cx.strokeStyle = "#5f3eef";
                 // this.cx.shadowColor="#5f3eef";
@@ -130,8 +131,8 @@ export class HomeComponent implements OnInit {
           if(this.keepX==null){
             this.keepX = event.offsetX;
             this.keepY = event.offsetY;
-            var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
-            this.imgTo.push({x:event.offsetX, y:event.offsetY, w:iim.width, h:iim.height, type:"imageSrc"});
+            var iim = document.getElementById("imageSrc2") as HTMLCanvasElement;
+            this.imgTo.push({x:event.offsetX, y:event.offsetY, w:iim.width, h:iim.height, type:"imageSrc2"});
           }
           
           this.imgTo.forEach((el: { x: number; y: number, w: number, h:number, type: string }) => {
@@ -139,8 +140,8 @@ export class HomeComponent implements OnInit {
               var iim = document.getElementById(el.type) as HTMLCanvasElement;
               this.cx.drawImage(iim,el.x, el.y, el.w, el.h);
 
-              if(event.offsetX-this.keepX <=el.w && event.offsetY-this.keepY <=el.h){
-                console.log(event.offsetX, this.keepX, event.offsetY, this.keepY)
+              if(event.offsetX-el.x <=el.w && event.offsetX-el.x >=0  && event.offsetY-el.y <=el.h && event.offsetY-el.y >=0){
+                console.log(event.offsetX,el.x, event.offsetY, el.y)
               }
             }
           });
@@ -242,12 +243,10 @@ export class HomeComponent implements OnInit {
 
 
 
-            if (this.im_1 != null) {
-              var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
-              this.im_1.drawImage(iim, 0, 0, iim.width, iim.height);
-
-
-            }
+            // if (this.im_1 != null) {
+            //   var iim = document.getElementById("imageSrc") as HTMLCanvasElement;
+            //   this.im_1.drawImage(iim, 0, 0, iim.width, iim.height);
+            // }
 
 
             html2canvas(this.canvas.nativeElement, { backgroundColor: null }).then(canvas => {
