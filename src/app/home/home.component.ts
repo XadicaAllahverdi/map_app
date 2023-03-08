@@ -13,7 +13,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
 
   }
-  layouts: any = ["ly_1", "ly_2", "ly_3"];
+  layouts: any = ["ly_0","ly_1", "ly_2", "ly_3"];
   spaces: any = ["sp_1", "sp_2", "sp_3"];
   connectors: any = ["cn_1", "cn_2", "cn_3", "cn_4", "cn_5"];
   spClick = false;
@@ -29,11 +29,12 @@ export class HomeComponent implements OnInit {
   cx: CanvasRenderingContext2D | null;
   firstX: any;
   firstY: any;
-  canDraw = true;
+  canDraw = false;
   keepX: any;
   keepY: any;
   drawingSubscription: Subscription = new Subscription();
   lineTo: any = [];
+  lineImg: any;
   imgTo: any = [];
   constructor() {
     this.cx = null;
@@ -93,12 +94,22 @@ export class HomeComponent implements OnInit {
       this.cx.lineWidth = 7;
       this.cx.beginPath();
       this.cx.moveTo(this.firstX, this.firstY);
-      this.lineTo.forEach((el: { x: number; y: number }) => {
-        if (this.cx != null) {
-          this.cx.lineTo(el.x, el.y);
-        }
-      });
-      this.cx?.stroke();
+      
+      if(this.lineImg){
+        var iim = document.getElementById(this.lineImg) as HTMLCanvasElement;
+      
+        this.cx.drawImage(iim, 0, 0, iim.width, iim.height);
+
+      }else{
+        this.lineTo.forEach((el: { x: number; y: number }) => {
+          if (this.cx != null) {
+            this.cx.lineTo(el.x, el.y);
+          }
+        });
+        this.cx?.stroke();
+      }
+     
+    
       this.cx.closePath();
       this.cx.fill();
 
@@ -134,7 +145,7 @@ export class HomeComponent implements OnInit {
       if (methodType == "mouseDown") {
         if (this.spClick) {
           var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
-          this.cx.drawImage(img_el, event.offsetX - 10, event.offsetY - 10, img_el.width, img_el.height);
+          this.cx.drawImage(img_el, event.offsetX - img_el.width/3, event.offsetY -  img_el.height/3, img_el.width, img_el.height);
           this.activeX = event.offsetX;
           this.activeY = event.offsetY;
         }
@@ -292,6 +303,7 @@ export class HomeComponent implements OnInit {
 
   spaceClick(item: string) {
     if (this.cx != null) {
+      this.fillWholeElements("mouseMove", {offsetX:0, offsetY:0});
       this.spClick = true;
       var img_el = document.getElementById(item) as HTMLCanvasElement;
       this.cx.drawImage(img_el, 0, 0, img_el.width, img_el.height);
@@ -300,12 +312,33 @@ export class HomeComponent implements OnInit {
 
   }
 
+  layoutClick(item: string) {
+    if (this.cx != null) {
+      this.lineTo = [];
+      this.lineImg = null;
+      this.fillWholeElements("mouseMove", {offsetX:0, offsetY:0});
+      if(item=="ly_0"){
+        this.canDraw = true;
+      }else{   
+        this.lyClick = true;
+        var img_el = document.getElementById(item) as HTMLCanvasElement;
+        console.log(img_el);
+        this.cx.drawImage(img_el, 0, 0, img_el.width, img_el.height);
+        this.activeKey = item;
+        this.lineImg = item;
+      }
+    
+    }
+
+  }
+
+
   save() {
     if (this.cx != null) {
       if(this.spClick){
         this.spClick = false;
         var img_el = document.getElementById(this.activeKey) as HTMLCanvasElement;
-        this.imgTo.push({ x: this.activeX, y: this.activeY, w: img_el.width, h: img_el.height, type: this.activeKey });
+        this.imgTo.push({ x: this.activeX- img_el.width/3, y: this.activeY-img_el.height/3, w: img_el.width, h: img_el.height, type: this.activeKey });
   
       }
     
