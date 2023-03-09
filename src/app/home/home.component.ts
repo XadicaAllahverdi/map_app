@@ -15,7 +15,8 @@ export class HomeComponent implements OnInit {
   }
   layouts: any = ["ly_0", "ly_1", "ly_2", "ly_3", "ly_4"];
   spaces: any = ["sp_1", "sp_2", "sp_3"];
-  connectors: any = ["cn_1", "cn_2", "cn_3", "cn_4", "cn_5", "cn_6", "cn_7", "cn_8", "cn_9"];
+  connectors: any = ["cn_1", "cn_2", "cn_3", "cn_4", "cn_5", "cn_6", "cn_7", "cn_8", "cn_9",
+  "cn_10", "cn_11", "cn_12", "cn_13", "cn_14", "cn_15"];
   spClick = false;
   lyClick = false;
   cnClick = false;
@@ -30,7 +31,7 @@ export class HomeComponent implements OnInit {
   cx: CanvasRenderingContext2D | null;
   firstX: any;
   firstY: any;
-  canDraw = false;
+  canDraw = true;
   keepX: any;
   keepY: any;
   drawingSubscription: Subscription = new Subscription();
@@ -158,13 +159,22 @@ export class HomeComponent implements OnInit {
       }
       }
     
-
-      this.cnTo.forEach((el: { x: number; y: number, w: number, h: number, type: string }) => {
+      var j = 0;
+      for(var j=0; j<this.cnTo.length;j++){
+        let el = this.cnTo[j];
         if (this.cx != null) {
           var iim = document.getElementById(el.type) as HTMLCanvasElement;
-          this.cx.drawImage(iim, el.x, el.y, el.w, el.h);
+         
+           if (methodType == "mouseDown"  && this.removeClick && event.offsetX - el.x <= el.w && event.offsetX - el.x >= 0 && event.offsetY - el.y <= el.h && event.offsetY - el.y >= 0) {
+            this.cnTo.splice(j, 1);
+            this.removeClick = false;
+          }
+          else {
+            this.cx.drawImage(iim, el.x, el.y, el.w, el.h);
+          }
+
         }
-      });
+      }
 
 
       if (methodType == "mouseDown") {
@@ -267,11 +277,11 @@ export class HomeComponent implements OnInit {
             html2canvas(this.canvas.nativeElement, { backgroundColor: null }).then(canvas => {
               if (this.canvas != null && this.downloadLink) {
 
-                this.canvas.nativeElement.src = canvas.toDataURL();
-                this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
-                //console.log(canvas.toDataURL("image/png"))
-                this.downloadLink.nativeElement.download = "marble-diagram.png";
-                this.downloadLink.nativeElement.click();
+                // this.canvas.nativeElement.src = canvas.toDataURL();
+                // this.downloadLink.nativeElement.href = canvas.toDataURL("image/png");
+                // //console.log(canvas.toDataURL("image/png"))
+                // this.downloadLink.nativeElement.download = "marble-diagram.png";
+                // this.downloadLink.nativeElement.click();
               }
 
             });
@@ -338,6 +348,7 @@ export class HomeComponent implements OnInit {
   spaceClick(item: string) {
     if (this.cx != null) {
       this.cnClick = false;
+      this.removeClick = false;
       this.fillWholeElements("mouseMove", { offsetX: 0, offsetY: 0 });
       this.spClick = true;
       var img_el = document.getElementById(item) as HTMLCanvasElement;
@@ -350,6 +361,7 @@ export class HomeComponent implements OnInit {
   connectorClick(item: string) {
     if (this.cx != null) {
       this.spClick = false;
+      this.removeClick = false;
       this.fillWholeElements("mouseMove", { offsetX: 0, offsetY: 0 });
       this.cnClick = true;
       var img_el = document.getElementById(item) as HTMLCanvasElement;
@@ -368,6 +380,7 @@ export class HomeComponent implements OnInit {
       this.imgTo = [];
       this.canDraw = false;
       this.spClick = false;
+      this.removeClick = false;
       this.cnClick = false;
       this.fillWholeElements("mouseMove", { offsetX: 0, offsetY: 0 });
       if (item == "ly_0") {
