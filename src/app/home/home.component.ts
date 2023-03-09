@@ -115,6 +115,23 @@ export class HomeComponent implements OnInit {
       this.cx.closePath();
       this.cx.fill();
 
+      var j = 0;
+      for(var j=0; j<this.cnTo.length;j++){
+        let el = this.cnTo[j];
+        if (this.cx != null) {
+          var iim = document.getElementById(el.type) as HTMLCanvasElement;
+         
+           if (methodType == "mouseDown"  && this.removeClick && event.offsetX - el.x <= el.w && event.offsetX - el.x >= 0 && event.offsetY - el.y <= el.h && event.offsetY - el.y >= 0) {
+            this.cnTo.splice(j, 1);
+            this.removeClick = false;
+          }
+          else {
+            this.cx.drawImage(iim, el.x, el.y, el.w, el.h);
+          }
+
+        }
+      }
+      
       var i = 0;
       for(var i=0; i<this.imgTo.length;i++){
        let el = this.imgTo[i];
@@ -159,22 +176,7 @@ export class HomeComponent implements OnInit {
       }
       }
     
-      var j = 0;
-      for(var j=0; j<this.cnTo.length;j++){
-        let el = this.cnTo[j];
-        if (this.cx != null) {
-          var iim = document.getElementById(el.type) as HTMLCanvasElement;
-         
-           if (methodType == "mouseDown"  && this.removeClick && event.offsetX - el.x <= el.w && event.offsetX - el.x >= 0 && event.offsetY - el.y <= el.h && event.offsetY - el.y >= 0) {
-            this.cnTo.splice(j, 1);
-            this.removeClick = false;
-          }
-          else {
-            this.cx.drawImage(iim, el.x, el.y, el.w, el.h);
-          }
-
-        }
-      }
+     
 
 
       if (methodType == "mouseDown") {
